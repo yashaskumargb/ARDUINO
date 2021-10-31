@@ -1,0 +1,64 @@
+#include<Servo.h>
+Servo door;
+int trig = 13;//initialing pin 13 of arduinot to TRIG of HC SR04
+int echo1 = 12;//initialing pin 12 of arduinot to ECHO of HC SR04
+float distance_calc(float time);
+void sig_gen(int trig);
+void gate_operation(float dist);
+void setup() 
+{ 
+  door.attach(6);
+  Serial.begin(9600);
+  pinMode(echo1,INPUT);
+  pinMode(trig,OUTPUT);//declaring pin 13 as OUTPUT
+  Serial.println("Ultrasonic Sensor HC-SR04 Test"); // print some text in Serial Monitor
+  Serial.println("with Arduino UNO R3");
+}
+
+void loop() 
+{ float time_of_travel,distance;
+  sig_gen(trig);
+  time_of_travel = pulseIn(echo1, HIGH);
+  distance=distance_calc(time_of_travel);
+  gate_operation(distance);
+  
+}
+float distance_calc(float time)
+{  float distance;
+   float speed=0.034;//in cm per microsec
+   distance = (speed * (time)) / 2;
+   distance = distance*1.013199949;//this value is obtained by error calculation method
+  //p=(original value/obtained value),do this for 10 readings 
+  //then take the mean ,which i got is 1,013199949
+  return distance;
+}
+void sig_gen(int trig)
+{
+  digitalWrite(trig,LOW);
+  delayMicroseconds(2);
+  digitalWrite(trig,HIGH);
+  delayMicroseconds(10);//10microsec
+  digitalWrite(trig,LOW); 
+
+}
+
+void gate_operation(float dist)
+{
+	if(dist<=200)// IF DISTANCE FROM SENSOR TO HUMAN IS LESS THAN 2METER
+    {
+      
+        {	for(int k=0;k<=110;k++)
+          {
+              door.write(k);
+          }
+        }
+      delay(1000);
+
+    }
+    else
+    {
+    	door.write(0);// BACK TO ORIGINAL POSITION
+    }
+}
+
+
